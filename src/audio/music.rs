@@ -73,7 +73,7 @@ impl<'memsrc> Music<'memsrc> {
     ///
     /// [`play`]: Music::play
     #[must_use]
-    pub fn from_file(filename: &str) -> Option<Music> {
+    pub fn from_file(filename: &str) -> Option<Music<'static>> {
         let c_str = CString::new(filename).unwrap();
         let music_tmp: *mut ffi::sfMusic = unsafe { ffi::sfMusic_createFromFile(c_str.as_ptr()) };
         if music_tmp.is_null() {
