@@ -9,6 +9,7 @@ use csfml_system_sys::sfBool;
 use std::{
     ffi::CString,
     io::{Read, Seek},
+    marker::PhantomData,
 };
 
 /// Streamed music played from an audio file.
@@ -52,11 +53,12 @@ use std::{
 
 ///
 #[derive(Debug)]
-pub struct Music {
+pub struct Music<'memsrc> {
     music: *mut ffi::sfMusic,
+    borrow: PhantomData<&'memsrc [u8]>,
 }
 
-impl Music {
+impl<'memsrc> Music<'memsrc> {
     /// Create a new music and load it from a file
     ///
     /// This function doesn't start playing the music (call [`play`] to do so).
@@ -77,7 +79,10 @@ impl Music {
         if music_tmp.is_null() {
             None
         } else {
-            Some(Music { music: music_tmp })
+            Some(Music {
+                music: music_tmp,
+                borrow: PhantomData,
+            })
         }
     }
 
@@ -101,7 +106,10 @@ impl Music {
         if music_tmp.is_null() {
             None
         } else {
-            Some(Music { music: music_tmp })
+            Some(Music {
+                music: music_tmp,
+                borrow: PhantomData,
+            })
         }
     }
 
@@ -125,7 +133,10 @@ impl Music {
         if music_tmp.is_null() {
             None
         } else {
-            Some(Music { music: music_tmp })
+            Some(Music {
+                music: music_tmp,
+                borrow: PhantomData,
+            })
         }
     }
 
@@ -261,7 +272,7 @@ impl Music {
     }
 }
 
-impl SoundSource for Music {
+impl<'memsrc> SoundSource for Music<'memsrc> {
     fn set_pitch(&mut self, pitch: f32) {
         unsafe { ffi::sfMusic_setPitch(self.music, pitch) }
     }
@@ -300,7 +311,7 @@ impl SoundSource for Music {
     }
 }
 
-impl Drop for Music {
+impl<'memsrc> Drop for Music<'memsrc> {
     fn drop(&mut self) {
         unsafe {
             ffi::sfMusic_destroy(self.music);
