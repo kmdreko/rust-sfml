@@ -46,8 +46,6 @@
     clippy::cast_sign_loss
 )]
 
-#[cfg(any(feature = "graphics", feature = "audio"))]
-mod inputstream;
 mod sf_bool_ext;
 
 #[cfg(feature = "audio")]

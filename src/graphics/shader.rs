@@ -1,7 +1,7 @@
 use crate::{
     graphics::{glsl, Texture},
-    inputstream::InputStream,
     sf_bool_ext::SfBoolExt,
+    system::InputStream,
 };
 use csfml_graphics_sys as ffi;
 use std::{
@@ -200,21 +200,21 @@ impl<'texture> Shader<'texture> {
     /// * `fragment_shader_stream` - Optional fragment shader stream
     ///
     /// Returns `None` if loading failed.
-    pub fn from_stream<T: Read + Seek>(
-        vertex_shader_stream: Option<&mut T>,
-        geometry_shader_stream: Option<&mut T>,
-        fragment_shader_stream: Option<&mut T>,
+    #[must_use]
+    pub fn from_stream<T: Read + Seek, U: Read + Seek, V: Read + Seek>(
+        mut vertex_shader_stream: Option<&mut InputStream<T>>,
+        mut geometry_shader_stream: Option<&mut InputStream<U>>,
+        mut fragment_shader_stream: Option<&mut InputStream<V>>,
     ) -> Option<Self> {
-        let mut vertex_stream = vertex_shader_stream.map(InputStream::new);
-        let mut geometry_stream = geometry_shader_stream.map(InputStream::new);
-        let mut fragment_stream = fragment_shader_stream.map(InputStream::new);
-        let vertex_ptr = vertex_stream.as_mut().map_or(ptr::null_mut(), |s| &mut s.0);
-        let geometry_ptr = geometry_stream
+        let vertex_ptr = vertex_shader_stream
             .as_mut()
-            .map_or(ptr::null_mut(), |s| &mut s.0);
-        let fragment_ptr = fragment_stream
+            .map_or(ptr::null_mut(), |s| &mut s.sf_input_stream);
+        let geometry_ptr = geometry_shader_stream
             .as_mut()
-            .map_or(ptr::null_mut(), |s| &mut s.0);
+            .map_or(ptr::null_mut(), |s| &mut s.sf_input_stream);
+        let fragment_ptr = fragment_shader_stream
+            .as_mut()
+            .map_or(ptr::null_mut(), |s| &mut s.sf_input_stream);
         let shader =
             unsafe { ffi::sfShader_createFromStream(vertex_ptr, geometry_ptr, fragment_ptr) };
         if shader.is_null() {

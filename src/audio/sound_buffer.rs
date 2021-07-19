@@ -1,5 +1,8 @@
 use crate::{
-    inputstream::InputStream, sf_bool_ext::SfBoolExt, sf_box::Dispose, system::Time, SfBox,
+    sf_bool_ext::SfBoolExt,
+    sf_box::Dispose,
+    system::{InputStream, Time},
+    SfBox,
 };
 use csfml_audio_sys as ffi;
 use std::{
@@ -167,9 +170,8 @@ impl SoundBuffer {
         SfBox::new(sound_buffer as *mut Self)
     }
     /// Load the sound buffer from a custom stream.
-    pub fn from_stream<T: Read + Seek>(stream: &mut T) -> Option<SfBox<Self>> {
-        let mut stream = InputStream::new(stream);
-        let buffer = unsafe { ffi::sfSoundBuffer_createFromStream(&mut stream.0) };
+    pub fn from_stream<T: Read + Seek>(stream: &mut InputStream<T>) -> Option<SfBox<Self>> {
+        let buffer = unsafe { ffi::sfSoundBuffer_createFromStream(&mut stream.sf_input_stream) };
         SfBox::new(buffer as *mut Self)
     }
     /// Load the sound buffer from a slice of audio samples.

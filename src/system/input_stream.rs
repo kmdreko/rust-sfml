@@ -2,6 +2,7 @@ use csfml_system_sys::sfInputStream;
 use std::{
     convert::TryInto,
     io::{Read, Seek, SeekFrom},
+    marker::PhantomData,
     os::raw::{c_longlong, c_void},
     ptr,
 };
@@ -55,18 +56,27 @@ unsafe extern "C" fn seek<T: Read + Seek>(
     }
 }
 
+/// Source for streaming data into SFML types.
 #[repr(C)]
-pub struct InputStream(pub sfInputStream);
+#[derive(Debug)]
+pub struct InputStream<'a, T> {
+    pub(crate) sf_input_stream: sfInputStream,
+    _source: PhantomData<&'a mut T>,
+}
 
-impl InputStream {
-    pub fn new<T: Read + Seek>(stream: &mut T) -> Self {
-        let user_data: *mut T = stream;
-        InputStream(sfInputStream {
-            userData: user_data as *mut c_void,
-            read: Some(read::<T>),
-            seek: Some(seek::<T>),
-            tell: Some(tell::<T>),
-            getSize: Some(get_size::<T>),
-        })
+impl<'a, T: Read + Seek> InputStream<'a, T> {
+    /// Create a new `InputStream` from a source implementing [`Read`] and [`Seek`]
+    pub fn new(source: &'a mut T) -> Self {
+        let user_data: *mut T = source;
+        InputStream {
+            sf_input_stream: sfInputStream {
+                userData: user_data as *mut c_void,
+                read: Some(read::<T>),
+                seek: Some(seek::<T>),
+                tell: Some(tell::<T>),
+                getSize: Some(get_size::<T>),
+            },
+            _source: PhantomData,
+        }
     }
 }

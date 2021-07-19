@@ -1,8 +1,8 @@
 use crate::{
     graphics::{Glyph, Texture},
-    inputstream::InputStream,
     sf_bool_ext::SfBoolExt,
     sf_box::{Dispose, SfBox},
+    system::InputStream,
 };
 use csfml_graphics_sys as ffi;
 use csfml_system_sys::sfBool;
@@ -155,9 +155,8 @@ impl Font {
     /// * stream - Your struct, implementing Read and Seek
     ///
     /// Returns `None` on failure.
-    pub fn from_stream<T: Read + Seek>(stream: &mut T) -> Option<SfBox<Self>> {
-        let mut input_stream = InputStream::new(stream);
-        let fnt = unsafe { ffi::sfFont_createFromStream(&mut input_stream.0) };
+    pub fn from_stream<T: Read + Seek>(stream: &mut InputStream<T>) -> Option<SfBox<Self>> {
+        let fnt = unsafe { ffi::sfFont_createFromStream(&mut stream.sf_input_stream) };
         SfBox::new(fnt as *mut Self)
     }
 

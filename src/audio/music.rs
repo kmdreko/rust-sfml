@@ -1,8 +1,7 @@
 use crate::{
     audio::{SoundSource, SoundStatus, TimeSpan},
-    inputstream::InputStream,
     sf_bool_ext::SfBoolExt,
-    system::{Time, Vector3f},
+    system::{InputStream, Time, Vector3f},
 };
 use csfml_audio_sys as ffi;
 use csfml_system_sys::sfBool;
@@ -94,10 +93,9 @@ impl Music {
     /// Returns `None` if loading fails.
     ///
     /// [`play`]: Music::play
-    pub fn from_stream<T: Read + Seek>(stream: &mut T) -> Option<Music> {
-        let mut input_stream = InputStream::new(stream);
+    pub fn from_stream<T: Read + Seek>(stream: &mut InputStream<T>) -> Option<Music> {
         let music_tmp: *mut ffi::sfMusic =
-            unsafe { ffi::sfMusic_createFromStream(&mut input_stream.0) };
+            unsafe { ffi::sfMusic_createFromStream(&mut stream.sf_input_stream) };
         if music_tmp.is_null() {
             None
         } else {
