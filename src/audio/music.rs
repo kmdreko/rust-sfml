@@ -52,12 +52,12 @@ use std::{
 
 ///
 #[derive(Debug)]
-pub struct Music<'src> {
+pub struct Music<Src> {
     music: *mut ffi::sfMusic,
-    _source: PhantomData<&'src mut ()>,
+    _source: PhantomData<Src>,
 }
 
-impl<'src> Music<'src> {
+impl Music<()> {
     /// Create a new music and load it from a file
     ///
     /// This function doesn't start playing the music (call [`play`] to do so).
@@ -72,7 +72,7 @@ impl<'src> Music<'src> {
     ///
     /// [`play`]: Music::play
     #[must_use]
-    pub fn from_file(filename: &str) -> Option<Music<'static>> {
+    pub fn from_file(filename: &str) -> Option<Self> {
         let c_str = CString::new(filename).unwrap();
         let music_tmp: *mut ffi::sfMusic = unsafe { ffi::sfMusic_createFromFile(c_str.as_ptr()) };
         if music_tmp.is_null() {
@@ -84,7 +84,9 @@ impl<'src> Music<'src> {
             })
         }
     }
+}
 
+impl<T: Read + Seek> Music<T> {
     /// Create a new music and load it from a stream (a struct implementing Read and Seek)
     ///
     /// This function doesn't start playing the music (call [`play`] to do so).
@@ -98,7 +100,9 @@ impl<'src> Music<'src> {
     /// Returns `None` if loading fails.
     ///
     /// [`play`]: Music::play
-    pub fn from_stream<T: Read + Seek>(stream: &'src mut InputStream<T>) -> Option<Music<'src>> {
+    pub fn from_stream<'src>(
+        stream: &'src mut InputStream<T>,
+    ) -> Option<Music<&'src mut InputStream<'src, T>>> {
         let music_tmp: *mut ffi::sfMusic =
             unsafe { ffi::sfMusic_createFromStream(&mut stream.sf_input_stream) };
         if music_tmp.is_null() {
@@ -110,7 +114,9 @@ impl<'src> Music<'src> {
             })
         }
     }
+}
 
+impl Music<&[u8]> {
     /// Create a new music and load it from memory
     ///
     /// This function doesn't start playing the music (call [`play`] to do so).
@@ -125,7 +131,7 @@ impl<'src> Music<'src> {
     ///
     /// [`play`]: Music::play
     #[must_use]
-    pub fn from_memory(mem: &'src [u8]) -> Option<Music<'src>> {
+    pub fn from_memory(mem: &[u8]) -> Option<Music<&[u8]>> {
         let music_tmp =
             unsafe { ffi::sfMusic_createFromMemory(mem.as_ptr() as *const _, mem.len()) };
         if music_tmp.is_null() {
@@ -137,7 +143,9 @@ impl<'src> Music<'src> {
             })
         }
     }
+}
 
+impl<Src> Music<Src> {
     /// Sets whether this music should loop or not.
     ///
     /// If `true`, the music will restart from beginning after
@@ -270,7 +278,7 @@ impl<'src> Music<'src> {
     }
 }
 
-impl<'src> SoundSource for Music<'src> {
+impl<Src> SoundSource for Music<Src> {
     fn set_pitch(&mut self, pitch: f32) {
         unsafe { ffi::sfMusic_setPitch(self.music, pitch) }
     }
@@ -309,7 +317,7 @@ impl<'src> SoundSource for Music<'src> {
     }
 }
 
-impl<'src> Drop for Music<'src> {
+impl<Src> Drop for Music<Src> {
     fn drop(&mut self) {
         unsafe {
             ffi::sfMusic_destroy(self.music);
