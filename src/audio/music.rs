@@ -163,7 +163,7 @@ impl<'stream> Music<'stream> {
     /// Return Music duration
     #[must_use]
     pub fn duration(&self) -> Time {
-        unsafe { Time::from_raw(ffi::sfMusic_getDuration(self.music)) }
+        unsafe { Time{microseconds: ffi::sfMusic_getDuration(self.music)} }
     }
 
     /// Start or resume playing a music
@@ -228,7 +228,7 @@ impl<'stream> Music<'stream> {
     /// Return the current playing position
     #[must_use]
     pub fn playing_offset(&self) -> Time {
-        unsafe { Time::from_raw(ffi::sfMusic_getPlayingOffset(self.music)) }
+        unsafe { Time{microseconds: ffi::sfMusic_getPlayingOffset(self.music)} }
     }
 
     /// Change the current playing position of a music
@@ -239,7 +239,7 @@ impl<'stream> Music<'stream> {
     /// # Arguments
     /// * timeOffset - New playing position
     pub fn set_playing_offset(&mut self, time_offset: Time) {
-        unsafe { ffi::sfMusic_setPlayingOffset(self.music, time_offset.raw()) }
+        unsafe { ffi::sfMusic_setPlayingOffset(self.music, time_offset.microseconds) }
     }
     /// Get the positions of the of the music's looping sequence.
     ///

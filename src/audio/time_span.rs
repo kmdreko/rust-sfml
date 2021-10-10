@@ -12,14 +12,14 @@ pub struct TimeSpan {
 impl TimeSpan {
     pub(crate) fn from_raw(raw: ffi::sfTimeSpan) -> Self {
         Self {
-            offset: Time::from_raw(raw.offset),
-            length: Time::from_raw(raw.length),
+            offset: Time{microseconds: raw.offset},
+            length: Time{microseconds: raw.length},
         }
     }
     pub(crate) fn into_raw(self) -> ffi::sfTimeSpan {
         ffi::sfTimeSpan {
-            offset: self.offset.raw(),
-            length: self.length.raw(),
+            offset: self.offset.as_microseconds(),
+            length: self.length.as_microseconds(),
         }
     }
 }

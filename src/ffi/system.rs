@@ -4,7 +4,44 @@ decl_opaque! {
     sfStdString;
 }
 
-pub type sfTime = i64;
+/// Represents a time value.
+///
+/// Time encapsulates a time value in a flexible way.
+///
+/// It allows to define a time value either as a number of seconds, milliseconds or microseconds.
+/// It also works the other way round: you can read a time value as either a number of seconds,
+/// milliseconds or microseconds.
+///
+/// By using such a flexible interface, the API doesn't impose any fixed type or resolution for
+/// time values, and let the user choose its own favorite representation.
+///
+/// Time values support the usual mathematical operations: you can add or subtract two times,
+/// multiply or divide a time by a number, compare two times, etc.
+///
+/// Since they represent a time span and not an absolute time value, times can also be negative.
+///
+/// # Usage example
+/// ```
+/// # use sfml::system::Time;
+/// let t1 = Time::seconds(0.1);
+/// assert_eq!(t1.as_milliseconds(), 100);
+///
+/// let t2 = Time::milliseconds(30);
+/// assert_eq!(t2.as_microseconds(), 30_000);
+///
+/// let t3 = Time::microseconds(-800_000);
+/// assert_eq!(t3.as_seconds(), -0.8);
+/// ```
+///
+/// # See also
+/// - [`Clock`]
+///
+/// [`Clock`]: crate::system::Clock
+#[repr(C)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub struct sfTime {
+    pub(crate) microseconds: i64,
+}
 
 /// Utility type that measures the elapsed time.
 ///
@@ -149,8 +186,8 @@ extern "C" {
     pub fn sfClipboard_setUnicodeString(text: *const sfUint32);
 
     pub fn sfClock_create() -> sfClock;
-    pub fn sfClock_getElapsedTime(clock: *const sfClock) -> sfInt64;
-    pub fn sfClock_restart(clock: *mut sfClock) -> sfInt64;
+    pub fn sfClock_getElapsedTime(clock: *const sfClock) -> sfTime;
+    pub fn sfClock_restart(clock: *mut sfClock) -> sfTime;
 
     pub fn sfSleep(duration: sfTime);
     pub fn sfStdString_getLength(s: *const sfStdString) -> usize;

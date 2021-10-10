@@ -198,7 +198,7 @@ impl<'a, R: SoundRecorder> SoundRecorderDriver<'a, R> {
     ///
     /// The default processing interval is 100 ms.
     pub fn set_processing_interval(&mut self, interval: Time) {
-        unsafe { sfSoundRecorder_setProcessingInterval(self.ffi_handle.as_ptr(), interval.raw()) }
+        unsafe { sfSoundRecorder_setProcessingInterval(self.ffi_handle.as_ptr(), interval.as_microseconds()) }
     }
     /// Get the name of the current audio capture device.
     #[must_use]

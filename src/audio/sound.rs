@@ -117,7 +117,7 @@ impl<'s> Sound<'s> {
     /// Return the current playing position
     #[must_use]
     pub fn playing_offset(&self) -> Time {
-        unsafe { Time::from_raw(ffi::sfSound_getPlayingOffset(self.sound.as_ptr())) }
+        unsafe { Time{microseconds: ffi::sfSound_getPlayingOffset(self.sound.as_ptr())} }
     }
 
     /// Change the current playing position of a sound
@@ -128,7 +128,7 @@ impl<'s> Sound<'s> {
     /// # Arguments
     /// * timeOffset - New playing position
     pub fn set_playing_offset(&mut self, time_offset: Time) {
-        unsafe { ffi::sfSound_setPlayingOffset(self.sound.as_ptr(), time_offset.raw()) }
+        unsafe { ffi::sfSound_setPlayingOffset(self.sound.as_ptr(), time_offset.microseconds) }
     }
 
     /// Set the source buffer containing the audio data to play

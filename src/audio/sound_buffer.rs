@@ -127,7 +127,7 @@ impl SoundBuffer {
     /// Return the sound duration
     #[must_use]
     pub fn duration(&self) -> Time {
-        unsafe { Time::from_raw(ffi::sfSoundBuffer_getDuration(self.raw())) }
+        unsafe { Time{microseconds: ffi::sfSoundBuffer_getDuration(self.raw())} }
     }
 
     /// Get the sample rate of a sound buffer

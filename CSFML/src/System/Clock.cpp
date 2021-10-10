@@ -24,18 +24,17 @@
 // Headers
 
 #include <SFML/System/Clock.hpp>
+#include <SFML/System/Time.hpp>
 #include <cstddef>
 
 extern "C" sf::Clock sfClock_create(void) {
     return sf::Clock();
 }
 
-extern "C" sf::Int64 sfClock_getElapsedTime(const sf::Clock *clock) {
-    sf::Time time = clock->getElapsedTime();
-    return time.asMicroseconds();
+extern "C" sf::Time sfClock_getElapsedTime(const sf::Clock *clock) {
+    return clock->getElapsedTime();
 }
 
-extern "C" sf::Int64 sfClock_restart(sf::Clock *clock) {
-    sf::Time time = clock->restart();
-    return time.asMicroseconds();
+extern "C" sf::Time sfClock_restart(sf::Clock *clock) {
+    return clock->restart();
 }

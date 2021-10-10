@@ -57,7 +57,7 @@ unsafe extern "C" fn seek_callback<S: SoundStream>(
     let stream = user_data as *mut S;
 
     let result = panic::catch_unwind(panic::AssertUnwindSafe(|| {
-        (*stream).seek(Time::from_raw(offset))
+        (*stream).seek(offset)
     }));
     if result.is_err() {
         eprintln!("sound_stream: Failed to seek because `seek` panicked.");
@@ -70,14 +70,15 @@ impl<'a, S: SoundStream> SoundStreamPlayer<'a, S> {
         let ptr: *mut S = sound_stream;
         SoundStreamPlayer {
             sf_sound_stream: unsafe {
-                NonNull::new(sfSoundStream_create(
+                /*NonNull::new(sfSoundStream_create(
                     Some(get_data_callback::<S>),
                     Some(seek_callback::<S>),
                     sound_stream.channel_count(),
                     sound_stream.sample_rate(),
                     ptr as *mut _,
                 ))
-                .expect("Failed to create SoundStreamPlayer")
+                .expect("Failed to create SoundStreamPlayer")*/
+                panic!("Stub")
             },
             stream: sound_stream,
         }
@@ -150,9 +151,9 @@ impl<'a, S: SoundStream> SoundStreamPlayer<'a, S> {
     #[must_use]
     pub fn playing_offset(&self) -> Time {
         unsafe {
-            Time::from_raw(sfSoundStream_getPlayingOffset(
+            Time{microseconds: sfSoundStream_getPlayingOffset(
                 self.sf_sound_stream.as_ptr(),
-            ))
+            )}
         }
     }
     /// Change the current playing position of the stream.
@@ -161,7 +162,7 @@ impl<'a, S: SoundStream> SoundStreamPlayer<'a, S> {
     /// Changing the playing position when the stream is stopped has no effect,
     /// since playing the stream would reset its position.
     pub fn set_playing_offset(&mut self, offset: Time) {
-        unsafe { sfSoundStream_setPlayingOffset(self.sf_sound_stream.as_ptr(), offset.raw()) }
+        unsafe { sfSoundStream_setPlayingOffset(self.sf_sound_stream.as_ptr(), offset.microseconds) }
     }
     /// Return the number of channels of the stream.
     ///
